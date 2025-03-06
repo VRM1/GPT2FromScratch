@@ -48,9 +48,14 @@ git clone https://github.com/yourusername/gpt2-implementation.git
 cd gpt2-implementation
 ```
 
-2. Install required packages:
+2. Install required packages using the provided requirements file:
 ```bash
+# Using pip
+pip install -r requirements.txt
+
+# Using conda
 conda env create -f requirements.yml
+conda activate gpt2-env
 ```
 
 3. Download NLTK resources (for BLEU calculation):
@@ -110,12 +115,15 @@ Key configuration sections:
 
 ## Zero-Shot Learning
 
-This implementation demonstrates GPT-2's zero-shot learning capabilities by training on examples formatted as:
+In the original paper "Language Models are Unsupervised Multitask Learners," the authors demonstrated that GPT-2 can perform multiple tasks without explicit supervision by simply pretraining on a large, diverse corpus of web text (WebText).
 
-- Translation: `French: [text] English: [translation]`
-- Sentiment: `Review: [text] Sentiment: [Positive/Negative]`
+This implementation takes a more focused approach due to computational constraints. Instead of training on a massive general corpus, we simulate the multitask learning capability by:
 
-At inference time, the model can complete these patterns without task-specific fine-tuning, showing how language models can perform multiple tasks with appropriate prompting.
+1. Combining two specific datasets (translation and sentiment analysis)
+2. Formatting the examples with task-specific prompts
+3. Training the model to recognize these patterns during pretraining
+
+At inference time, the model can complete these patterns without task-specific fine-tuning, showing how language models can perform multiple tasks with appropriate prompting, even when trained on a smaller, more focused dataset.
 
 ## Results
 
