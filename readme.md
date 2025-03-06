@@ -2,6 +2,8 @@
 
 This repository contains an implementation of the GPT-2 language model based on the paper ["Language Models are Unsupervised Multitask Learners"](https://d4mucfpksywv.cloudfront.net/better-language-models/language-models.pdf) by Radford et al. The implementation is built by adapting the Transformer architecture from the ["Attention Is All You Need"](https://arxiv.org/abs/1706.03762) paper.
 
+**Note**: This might not be an exact 1:1 reproduction of the GPT-2 model, but the core essential components are mostly the same.
+
 The code is inspired by and builds upon the excellent Transformer implementation by [Yu-Hsiang Huang](https://github.com/jadore801120/attention-is-all-you-need-pytorch).
 
 ## Features
