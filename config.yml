@@ -1,0 +1,48 @@
+# GPT-2 Multitask Configuration
+
+# Model configuration
+model:
+  n_positions: 1024          # Maximum sequence length
+  n_embd: 768                # Embedding dimension (768 for GPT-2 small)
+  n_layer: 12                # Number of layers (12 for GPT-2 small)
+  n_head: 12                 # Number of attention heads (12 for GPT-2 small)
+  d_inner: 3072              # Inner dimension of feed-forward layers
+  vocab_size: 50257          # Vocabulary size for BPE tokenization
+  dropout: 0.1               # Dropout rate
+  initializer_range: 0.02    # Initialization range for weights
+
+# Training configuration
+training:
+  batch_size: 16             # Reduced batch size for GPUs with less memory
+  epochs: 5                  # Fewer epochs since we're training on specific tasks
+  learning_rate: 0.0001
+  lr_scheduler: linear
+  warmup_steps: 1000
+  weight_decay: 0.01
+  gradient_accumulation_steps: 1
+  max_grad_norm: 1.0
+  fp16: True                # Whether to use mixed precision training
+  resume_training: false     # Whether to resume training from a checkpoint
+  resume_checkpoint: /media/6TB_Volume/LLMs/gpt2/final_model.pt      # Path to the checkpoint to resume from
+
+# Data configuration
+data:
+  max_seq_length: 512        # Reduced sequence length to save memory
+  tokenizer_path: "gpt2"     # Use "gpt2" for HuggingFace's pretrained tokenizer
+
+# Logging and saving
+output:
+  log_interval: 50
+  eval_interval: 500
+  save_interval: 1000
+  output_dir: "/media/6TB_Volume/LLMs/gpt2"
+  tensorboard_dir: "./runs"
+
+# Testing configuration
+test:
+  model_path: "/media/6TB_Volume/LLMs/gpt2/final_model.pt"  # Path to the trained model checkpoint
+  mode: "interactive"  # "interactive" or "automatic"
+  max_length: 50  # Maximum length for generated text
+  temperature: 0.7  # Sampling temperature
+  top_k: 50  # Top-k sampling parameter
+  top_p: 0.2  # Top-p (nucleus) sampling parameter
