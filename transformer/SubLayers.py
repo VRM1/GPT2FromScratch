@@ -4,13 +4,24 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from transformer.Modules import ScaledDotProductAttention
+from transformer.Modules import ScaledDotProductAttention, WindowedScaledDotProductAttention, CausalWindowedAttention
 
 class MultiHeadAttention(nn.Module):
     ''' Multi-Head Attention module '''
-    # This class is used in both Transformer and GPT-2 with no changes
 
-    def __init__(self, n_head, d_model, d_k, d_v, dropout=0.1):
+    def __init__(self, n_head, d_model, d_k, d_v, dropout=0.1, attention_type="full", window_size=256):
+        """
+        Initialize Multi-Head Attention module
+        
+        Args:
+            n_head: Number of attention heads
+            d_model: Model dimension
+            d_k: Key dimension per head
+            d_v: Value dimension per head
+            dropout: Dropout probability
+            attention_type: Type of attention mechanism ("full", "windowed", "causal_windowed")
+            window_size: Window size for windowed attention types
+        """
         super().__init__()
 
         self.n_head = n_head
@@ -22,7 +33,23 @@ class MultiHeadAttention(nn.Module):
         self.w_vs = nn.Linear(d_model, n_head * d_v, bias=False)
         self.fc = nn.Linear(n_head * d_v, d_model, bias=False)
 
-        self.attention = ScaledDotProductAttention(temperature=d_k ** 0.5)
+        # Initialize the appropriate attention mechanism
+        if attention_type == "full":
+            self.attention = ScaledDotProductAttention(temperature=d_k ** 0.5, attn_dropout=dropout)
+        elif attention_type == "windowed":
+            self.attention = WindowedScaledDotProductAttention(
+                temperature=d_k ** 0.5, 
+                window_size=window_size, 
+                attn_dropout=dropout
+            )
+        elif attention_type == "causal_windowed":
+            self.attention = CausalWindowedAttention(
+                temperature=d_k ** 0.5, 
+                window_size=window_size, 
+                attn_dropout=dropout
+            )
+        else:
+            raise ValueError(f"Unknown attention type: {attention_type}")
 
         self.dropout = nn.Dropout(dropout)
         self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)

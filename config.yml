@@ -10,6 +10,8 @@ model:
   vocab_size: 50257          # Vocabulary size for BPE tokenization
   dropout: 0.1               # Dropout rate
   initializer_range: 0.02    # Initialization range for weights
+  attention_type: "causal_windowed"     # Attention type: "full", "windowed", or "causal_windowed"
+  window_size: 25           # Window size for windowed attention types
 
 # Training configuration
 training:

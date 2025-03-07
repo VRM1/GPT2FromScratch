@@ -13,9 +13,11 @@ class DecoderLayer(nn.Module):
     2. No encoder-decoder attention: GPT-2 is decoder-only with no encoder
     3. Explicit residual connections after each sub-layer
     4. Uses epsilon=1e-5 for layer norm (smaller than Transformer's 1e-6)
+    5. Support for different attention mechanisms: full, windowed, or causal windowed
     '''
 
-    def __init__(self, d_model, d_inner, n_head, d_k, d_v, dropout=0.1):
+    def __init__(self, d_model, d_inner, n_head, d_k, d_v, dropout=0.1, 
+                 attention_type="full", window_size=256):
         super(DecoderLayer, self).__init__()
         
         # Layer norm before self-attention (Pre-norm architecture in GPT-2)
@@ -23,15 +25,19 @@ class DecoderLayer(nn.Module):
         self.slf_attn_layer_norm = nn.LayerNorm(d_model, eps=1e-5)
         
         # Self-attention layer (same as Transformer)
-        self.slf_attn = MultiHeadAttention(n_head, d_model, d_k, d_v, dropout=dropout)
+        self.slf_attn = MultiHeadAttention(
+            n_head, d_model, d_k, d_v, 
+            dropout=dropout, 
+            attention_type=attention_type,
+            window_size=window_size
+        )
         
         # Layer norm before feed-forward (Pre-norm architecture in GPT-2)
         self.ffn_layer_norm = nn.LayerNorm(d_model, eps=1e-5)
         
         # Feed-forward network (same component as Transformer)
         # Note: Original GPT-2 uses GELU activation instead of ReLU
-        # This would need to be modified in the PositionwiseFeedForward class
-        self.pos_ffn = PositionwiseFeedForward(d_model, d_inner, dropout=dropout)
+        self.pos_ffn = PositionwiseFeedForward(d_model, d_inner, dropout=dropout, activation='gelu')
         
         # Removed encoder-decoder attention that was present in original Transformer
 

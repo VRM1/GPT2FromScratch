@@ -46,18 +46,22 @@ class GPT2(nn.Module):
     3. Uses Layer Normalization before each sub-layer (pre-norm)
     4. Adds a final Layer Normalization at the end
     5. Weight tying between input embedding and output projection
+    6. Support for different attention mechanisms: full, windowed, or causal windowed
     """
     
     def __init__(
             self, vocab_size, pad_idx, 
             d_model=768, n_layers=12, n_head=12, d_k=64, d_v=64,
-            d_inner=3072, dropout=0.1, max_position_embeddings=1024):
+            d_inner=3072, dropout=0.1, max_position_embeddings=1024,
+            attention_type="full", window_size=256):
         
         super().__init__()
         
         self.pad_idx = pad_idx
         self.vocab_size = vocab_size
         self.d_model = d_model
+        self.attention_type = attention_type
+        self.window_size = window_size
         
         # Embedding layer (token + position embeddings)
         self.embedding = GPT2Embedding(
@@ -69,7 +73,12 @@ class GPT2(nn.Module):
         
         # Stack of decoder layers
         self.layers = nn.ModuleList([
-            DecoderLayer(d_model, d_inner, n_head, d_k, d_v, dropout=dropout)
+            DecoderLayer(
+                d_model, d_inner, n_head, d_k, d_v, 
+                dropout=dropout,
+                attention_type=attention_type,
+                window_size=window_size
+            )
             for _ in range(n_layers)
         ])
         

@@ -377,7 +377,7 @@ def save_model(model, optimizer, scheduler, step, loss, path):
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Train GPT-2 for multitask learning")
-    parser.add_argument("--config", type=str, default="config2.yml", help="Path to config file")
+    parser.add_argument("--config", type=str, default="config.yml", help="Path to config file")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
     parser.add_argument("--prepare_data", action="store_true", help="Prepare datasets before training")
     parser.add_argument("--resume", action="store_true", help="Resume training (overrides config)")
@@ -441,7 +441,7 @@ def main():
     
     logger.info(f"Train dataset size: {len(train_dataset)}")
     
-    # Initialize model
+    # Initialize model with attention configuration
     model = GPT2(
         vocab_size=config['model']['vocab_size'],
         pad_idx=tokenizer.pad_token_id,
@@ -452,8 +452,15 @@ def main():
         d_v=config['model']['n_embd'] // config['model']['n_head'],
         d_inner=config['model']['d_inner'],
         dropout=config['model']['dropout'],
-        max_position_embeddings=config['model']['n_positions']
+        max_position_embeddings=config['model']['n_positions'],
+        attention_type=config['model'].get('attention_type', 'full'),  # Default to full attention if not specified
+        window_size=config['model'].get('window_size', 256)            # Default window size of 256 if not specified
     ).to(device)
+    
+    # Log attention configuration
+    logger.info(f"Using attention type: {config['model'].get('attention_type', 'full')}")
+    if config['model'].get('attention_type', 'full') in ['windowed', 'causal_windowed']:
+        logger.info(f"Window size: {config['model'].get('window_size', 256)}")
     
     # Initialize optimizer
     optimizer = optim.AdamW(
